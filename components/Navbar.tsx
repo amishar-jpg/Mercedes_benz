@@ -96,8 +96,8 @@ export default function Navbar() {
             <li key={link}>
               <motion.a
                 href="#"
-                className="relative uppercase tracking-wider"
-                style={{ fontFamily: "var(--font-body)", fontSize: "14px", letterSpacing: "0.1em", fontWeight: 500, color: activeLink === link ? "#b8962e" : "rgba(240,237,232,0.75)", transition: "color 0.3s ease" }}
+                className="relative uppercase tracking-widest"
+                style={{ fontFamily: "var(--font-body)", fontSize: "11px", letterSpacing: "0.15em", fontWeight: 400, color: activeLink === link ? "#b8962e" : "rgba(240,237,232,0.65)", transition: "color 0.3s ease" }}
                 onHoverStart={() => setActiveLink(link)}
                 onHoverEnd={() => setActiveLink(null)}
                 whileHover={{ color: "#f0ede8" }}
@@ -117,16 +117,16 @@ export default function Navbar() {
         {/* Configure CTA */}
         <motion.a
           href="#configure"
-          className="hidden md:flex items-center gap-2 relative overflow-hidden"
+          className="hidden md:flex items-center gap-2 relative overflow-hidden group"
           style={{
             border: "1px solid rgba(184,150,46,0.55)",
             color: "#b8962e",
             fontFamily: "var(--font-body)",
-            fontSize: "13px",
-            letterSpacing: "0.1em",
-            fontWeight: 600,
+            fontSize: "11px",
+            letterSpacing: "0.15em",
+            fontWeight: 500,
             textTransform: "uppercase",
-            padding: "12px 28px",
+            padding: "10px 24px",
             borderRadius: "4px",
           }}
           whileHover={{ color: "#080808", scale: 1.02 }}
@@ -138,7 +138,7 @@ export default function Navbar() {
             whileHover={{ x: 0 }}
             transition={{ duration: 0.4 }}
           />
-          <span className="relative z-10">Configure</span>
+          <span className="relative z-10 transition-colors duration-300 group-hover:text-[#080808]">Configure</span>
         </motion.a>
 
         {/* Mobile menu button */}

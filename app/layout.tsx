@@ -1,17 +1,17 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Montserrat } from "next/font/google";
+import { Poppins, Inter } from "next/font/google";
 import "./globals.css";
 
-// Premium display font — classic, elegant, luxury
-const garamond = Cormorant_Garamond({
+// Premium modern display font
+const poppins = Poppins({
   subsets: ["latin"],
   variable: "--font-display",
   weight: ["300", "400", "500", "600", "700"],
   style: ["normal", "italic"],
 });
 
-// Clean geometric sans — modern, highly readable, premium
-const montserrat = Montserrat({
+// Clean geometric sans for body
+const inter = Inter({
   subsets: ["latin"],
   variable: "--font-body",
   weight: ["200", "300", "400", "500", "600", "700"],
@@ -30,7 +30,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${garamond.variable} ${montserrat.variable} antialiased`}>
+      <body className={`${poppins.variable} ${inter.variable} antialiased`}>
         {children}
       </body>
     </html>

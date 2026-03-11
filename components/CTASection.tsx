@@ -188,10 +188,7 @@ export default function CTASection() {
                   style={
                     i === 2
                       ? {
-                          background: "linear-gradient(110deg, #b8962e 0%, #e8c86a 50%, #c8a030 100%)",
-                          WebkitBackgroundClip: "text",
-                          WebkitTextFillColor: "transparent",
-                          backgroundClip: "text",
+                          color: "#b8962e",
                           fontWeight: 700,
                           fontStyle: "normal",
                         }

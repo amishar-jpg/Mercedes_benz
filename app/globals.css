@@ -26,19 +26,22 @@
 }
 
 html {
-  scroll-behavior: auto;
+  scroll-behavior: smooth;
   background: var(--mb-black);
-  overflow-x: hidden;
 }
 
 body {
   background: var(--mb-black);
   color: var(--mb-white);
   font-family: var(--font-body), "Helvetica Neue", Arial, sans-serif;
-  overflow-x: hidden;
   cursor: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Base styles to prevent horizontal scroll without breaking sticky */
+#__next, main, body {
+  max-width: 100vw;
 }
 
 /* Display font for headings */

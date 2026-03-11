@@ -408,36 +408,6 @@ export default function VideoScrubSection() {
           />
         </div>
 
-        {/* Scroll hint — top */}
-        <div
-          className="absolute z-20 flex items-center gap-3"
-          style={{
-            top: "clamp(28px, 4vh, 44px)",
-            right: "clamp(28px, 6vw, 96px)",
-            opacity: scrollPct > 5 ? 0 : 0.4,
-            transition: "opacity 0.6s ease",
-          }}
-        >
-          <span
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "9px",
-              letterSpacing: "0.38em",
-              textTransform: "uppercase",
-              color: "#f0ede8",
-            }}
-          >
-            Scroll to explore
-          </span>
-          <motion.svg
-            width="14" height="8" viewBox="0 0 16 10" fill="none"
-            animate={{ x: [0, 5, 0] }}
-            transition={{ duration: 1.6, repeat: Infinity }}
-          >
-            <path d="M0 5 H14 M10 1 L14 5 L10 9" stroke="white" strokeWidth="1" />
-          </motion.svg>
-        </div>
-
         {/* Corner marks */}
         {[
           { pos: "top-20 left-8", b: "border-t border-l" },

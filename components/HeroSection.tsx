@@ -15,8 +15,6 @@ export default function HeroSection() {
   const titleLine1Ref = useRef<HTMLHeadingElement>(null);
   const titleLine2Ref = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLParagraphElement>(null);
-  const ctaRef = useRef<HTMLDivElement>(null);
-  const scrollIndicatorRef = useRef<HTMLDivElement>(null);
   const statsRef = useRef<HTMLDivElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
 
@@ -78,35 +76,11 @@ export default function HeroSection() {
       );
 
       tl.fromTo(
-        ctaRef.current,
-        { opacity: 0, y: 24 },
-        { opacity: 1, y: 0, duration: 1, ease: "power3.out" },
-        1.95
-      );
-
-      tl.fromTo(
         statsRef.current,
         { opacity: 0, y: 20 },
         { opacity: 1, y: 0, duration: 1, ease: "power3.out" },
         2.18
       );
-
-      tl.fromTo(
-        scrollIndicatorRef.current,
-        { opacity: 0 },
-        { opacity: 1, duration: 0.6 },
-        2.5
-      );
-
-      const scrollDot = scrollIndicatorRef.current?.querySelector(".scroll-dot") ?? null;
-      gsap.to(scrollDot, {
-        y: 14,
-        duration: 1.6,
-        repeat: -1,
-        yoyo: true,
-        ease: "power1.inOut",
-        delay: 3.5,
-      });
 
       // Subtle parallax on scroll — no scale, just translate
       ScrollTrigger.create({
@@ -260,7 +234,7 @@ export default function HeroSection() {
             ref={titleLine1Ref}
             style={{
               fontFamily: "var(--font-display)",
-              fontSize: "clamp(60px, 10vw, 156px)",
+              fontSize: "clamp(48px, 8vw, 120px)",
               fontWeight: 300,
               letterSpacing: "-0.02em",
               lineHeight: 0.92,
@@ -276,15 +250,12 @@ export default function HeroSection() {
             ref={titleLine2Ref}
             style={{
               fontFamily: "var(--font-display)",
-              fontSize: "clamp(60px, 10vw, 156px)",
+              fontSize: "clamp(48px, 8vw, 120px)",
               fontWeight: 700,
               letterSpacing: "-0.025em",
               lineHeight: 0.92,
               clipPath: "inset(100% 0% 0% 0%)",
-              background: "linear-gradient(110deg, #f0ede8 0%, #e8c86a 38%, #b8962e 65%, #c8a030 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
+              color: "#b8962e",
             }}
           >
             -Benz AMG
@@ -308,79 +279,11 @@ export default function HeroSection() {
           who demand nothing short of perfection.
         </p>
 
-        {/* CTA Buttons */}
-        <div ref={ctaRef} className="opacity-0 flex flex-wrap items-center gap-6 mb-20">
-          {/* Primary — no overflow:hidden on motion.a, use inner wrapper instead */}
-          <motion.a
-            href="#configure"
-            className="group relative flex items-center gap-4"
-            style={{
-              background: "linear-gradient(110deg, #b8962e, #d4a843)",
-              color: "#070707",
-              fontFamily: "var(--font-body)",
-              fontSize: "14px",
-              letterSpacing: "0.1em",
-              fontWeight: 600,
-              textTransform: "uppercase",
-              overflow: "hidden",
-              padding: "16px 36px",
-              borderRadius: "4px",
-            }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            transition={{ duration: 0.2 }}
-          >
-            <span className="relative z-10 whitespace-nowrap" style={{ color: "#070707" }}>
-              Configure Now
-            </span>
-            <motion.span
-              className="relative z-10"
-              animate={{ x: [0, 5, 0] }}
-              transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-              style={{ color: "#070707" }}
-            >
-              →
-            </motion.span>
-            {/* Fill on hover — ensure z-index is below text */}
-            <span
-              className="absolute inset-0 translate-x-[-101%] group-hover:translate-x-0 transition-transform duration-500 ease-out"
-              style={{ background: "linear-gradient(110deg, #d4a843, #e8c86a)", zIndex: 0 }}
-            />
-          </motion.a>
-
-          {/* Secondary */}
-          <motion.a
-            href="#models"
-            className="flex items-center gap-4"
-            style={{
-              border: "1px solid rgba(240,237,232,0.20)",
-              color: "rgba(240,237,232,0.85)",
-              fontFamily: "var(--font-body)",
-              fontSize: "14px",
-              letterSpacing: "0.1em",
-              fontWeight: 500,
-              textTransform: "uppercase",
-              backdropFilter: "blur(10px)",
-              padding: "16px 36px",
-              borderRadius: "4px",
-            }}
-            whileHover={{
-              scale: 1.02,
-              borderColor: "rgba(184,150,46,0.55)",
-              color: "#f0ede8",
-            }}
-            whileTap={{ scale: 0.98 }}
-            transition={{ duration: 0.2 }}
-          >
-            Discover More
-          </motion.a>
-        </div>
-
         {/* Stats bar */}
         <div
           ref={statsRef}
           className="opacity-0 flex items-center border-t pt-8"
-          style={{ borderColor: "rgba(240,237,232,0.08)" }}
+          style={{ borderColor: "rgba(240,237,232,0.08)", marginTop: "40px" }}
         >
           {heroStats.map((stat, i) => (
             <motion.div
@@ -419,31 +322,6 @@ export default function HeroSection() {
           ))}
         </div>
       </motion.div>
-
-      {/* Scroll indicator */}
-      <div
-        ref={scrollIndicatorRef}
-        className="absolute right-10 bottom-28 opacity-0 flex flex-col items-center gap-4 z-40"
-      >
-        <div
-          style={{
-            fontFamily: "var(--font-body)",
-            fontSize: "8px",
-            letterSpacing: "0.4em",
-            writingMode: "vertical-rl",
-            color: "rgba(240,237,232,0.28)",
-            textTransform: "uppercase",
-          }}
-        >
-          Scroll
-        </div>
-        <div className="w-px h-20 relative overflow-hidden" style={{ background: "rgba(240,237,232,0.08)" }}>
-          <div
-            className="scroll-dot absolute top-0 left-0 w-full h-6"
-            style={{ background: "linear-gradient(180deg, #b8962e, transparent)" }}
-          />
-        </div>
-      </div>
 
       {/* Corner accent — top right */}
       <motion.div

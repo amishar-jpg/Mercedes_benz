@@ -270,10 +270,7 @@ export default function PerformanceSection() {
             <br />
             <span
               style={{
-                background: "linear-gradient(110deg, #b8962e, #e8c86a, #c8a030)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
+                color: "#b8962e",
                 fontWeight: 700,
                 fontStyle: "normal",
               }}
