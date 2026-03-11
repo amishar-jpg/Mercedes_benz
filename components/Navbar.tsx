@@ -48,14 +48,14 @@ export default function Navbar() {
       className="fixed top-0 left-0 right-0 z-50 transition-all duration-500"
       style={{
         background: scrolled
-          ? "rgba(6,6,6,0.92)"
-          : "linear-gradient(180deg, rgba(0,0,0,0.65) 0%, transparent 100%)",
-        backdropFilter: scrolled ? "blur(20px) saturate(1.4)" : "none",
-        borderBottom: scrolled ? "1px solid rgba(184,150,46,0.12)" : "none",
-        boxShadow: scrolled ? "0 4px 40px rgba(0,0,0,0.4)" : "none",
+          ? "rgba(6,6,6,0.8)"
+          : "linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%)",
+        backdropFilter: scrolled ? "blur(30px) saturate(1.5)" : "none",
+        borderBottom: scrolled ? "1px solid rgba(184,150,46,0.15)" : "none",
+        boxShadow: scrolled ? "0 10px 40px rgba(0,0,0,0.5)" : "none",
       }}
     >
-      <div className="flex items-center justify-between px-8 md:px-16 py-5">
+      <div className="flex items-center justify-between transition-all duration-500" style={{ padding: scrolled ? "16px clamp(24px, 5vw, 80px)" : "24px clamp(24px, 5vw, 80px)" }}>
         {/* Logo */}
         <div ref={logoRef} className="flex items-center gap-3 opacity-0">
           <motion.svg
@@ -78,11 +78,11 @@ export default function Navbar() {
           </motion.svg>
           <span
             style={{
-              fontFamily: "var(--font-inter)",
-              letterSpacing: "0.22em",
-              fontSize: "12px",
-              fontWeight: 300,
-              color: "#f5f5f5",
+              fontFamily: "var(--font-display)",
+              letterSpacing: "0.15em",
+              fontSize: "18px",
+              fontWeight: 500,
+              color: "#f0ede8",
               textTransform: "uppercase",
             }}
           >
@@ -96,11 +96,11 @@ export default function Navbar() {
             <li key={link}>
               <motion.a
                 href="#"
-                className="relative text-[11px] tracking-widest uppercase"
-                style={{ color: activeLink === link ? "#b8962e" : "rgba(245,245,245,0.6)" }}
+                className="relative uppercase tracking-wider"
+                style={{ fontFamily: "var(--font-body)", fontSize: "14px", letterSpacing: "0.1em", fontWeight: 500, color: activeLink === link ? "#b8962e" : "rgba(240,237,232,0.75)", transition: "color 0.3s ease" }}
                 onHoverStart={() => setActiveLink(link)}
                 onHoverEnd={() => setActiveLink(null)}
-                whileHover={{ color: "#f5f5f5" }}
+                whileHover={{ color: "#f0ede8" }}
               >
                 {link}
                 <motion.span
@@ -117,11 +117,17 @@ export default function Navbar() {
         {/* Configure CTA */}
         <motion.a
           href="#configure"
-          className="hidden md:flex items-center gap-2 px-6 py-2.5 text-[11px] tracking-widest uppercase relative overflow-hidden"
+          className="hidden md:flex items-center gap-2 relative overflow-hidden"
           style={{
-            border: "1px solid rgba(184,150,46,0.5)",
+            border: "1px solid rgba(184,150,46,0.55)",
             color: "#b8962e",
-            letterSpacing: "0.22em",
+            fontFamily: "var(--font-body)",
+            fontSize: "13px",
+            letterSpacing: "0.1em",
+            fontWeight: 600,
+            textTransform: "uppercase",
+            padding: "12px 28px",
+            borderRadius: "4px",
           }}
           whileHover={{ color: "#080808", scale: 1.02 }}
           whileTap={{ scale: 0.97 }}

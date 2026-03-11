@@ -30,7 +30,7 @@ const KEYFRAMES = [
     label: "Technology",
     title: "Intelligent\nDrive",
     body: "MBUX Hyperscreen learns your world. AI co-pilot for every journey.",
-    accent: "#5c8de8",
+    accent: "#6aa3e8",
   },
   {
     progress: 0.82,
@@ -38,115 +38,132 @@ const KEYFRAMES = [
     label: "Electrification",
     title: "Electric\nFuture",
     body: "The EQS. 770 km range. Zero compromise. The pinnacle of electric luxury.",
-    accent: "#60d4a8",
+    accent: "#50c8a0",
   },
 ];
 
 export default function VideoScrubSection() {
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const stickyRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
-  const progressNumRef = useRef<HTMLSpanElement>(null);
   const [activeKF, setActiveKF] = useState(0);
   const [scrollPct, setScrollPct] = useState(0);
-  const frameRefs = useRef<(HTMLImageElement | null)[]>([]);
   const [capturedFrames, setCapturedFrames] = useState<string[]>([]);
+  const activeKFRef = useRef(0);
+  const scrollPctRef = useRef(0);
 
-  // Extract multiple frames from the video for 3D showcase
+  // Extract frames from video
   useEffect(() => {
     const video = document.createElement("video");
     video.src = "/hero.mp4";
     video.muted = true;
-    video.preload = "auto";
+    video.preload = "metadata";
 
-    const framesToCapture = [0.05, 0.25, 0.55, 0.82];
-    const frames: string[] = [];
+    const framesToCapture = [0.04, 0.28, 0.55, 0.82];
+    const frames: string[] = new Array(framesToCapture.length);
     let captured = 0;
 
-    const captureAt = (fraction: number) => {
-      return new Promise<string>((resolve) => {
-        const onSeeked = () => {
-          const canvas = document.createElement("canvas");
-          canvas.width = 640;
-          canvas.height = 360;
-          const ctx = canvas.getContext("2d");
-          if (ctx) ctx.drawImage(video, 0, 0, 640, 360);
-          resolve(canvas.toDataURL("image/webp", 0.85));
-          video.removeEventListener("seeked", onSeeked);
-        };
-        video.addEventListener("seeked", onSeeked);
-        video.currentTime = video.duration * fraction;
-      });
-    };
-
-    video.addEventListener("loadedmetadata", async () => {
-      for (const frac of framesToCapture) {
-        const dataUrl = await captureAt(frac);
-        frames.push(dataUrl);
+    const captureAt = (index: number, fraction: number) => {
+      const onSeeked = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 480;
+        canvas.height = 270;
+        const ctx = canvas.getContext("2d");
+        if (ctx) ctx.drawImage(video, 0, 0, 480, 270);
+        frames[index] = canvas.toDataURL("image/webp", 0.82);
+        video.removeEventListener("seeked", onSeeked);
         captured++;
         if (captured === framesToCapture.length) {
           setCapturedFrames([...frames]);
         }
-      }
+        // Capture next frame
+        if (index + 1 < framesToCapture.length) {
+          setTimeout(() => captureAt(index + 1, framesToCapture[index + 1]), 80);
+        }
+      };
+      video.addEventListener("seeked", onSeeked, { once: true });
+      video.currentTime = video.duration * fraction;
+    };
+
+    video.addEventListener("loadedmetadata", () => {
+      captureAt(0, framesToCapture[0]);
     }, { once: true });
 
     video.load();
+
+    return () => {
+      video.src = "";
+    };
   }, []);
 
+  // Scrub scroll trigger
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    const init = () => {
-      const ctx = gsap.context(() => {
-        ScrollTrigger.create({
-          trigger: wrapperRef.current,
-          start: "top top",
-          end: "bottom bottom",
-          scrub: 0.4,
-          onUpdate: (self) => {
-            const p = self.progress;
-            setScrollPct(Math.round(p * 100));
+    let scrollTriggerInstance: ScrollTrigger | null = null;
 
-            if (video.duration && !isNaN(video.duration)) {
-              video.currentTime = p * video.duration;
-            }
+    const setupScrub = () => {
+      scrollTriggerInstance = ScrollTrigger.create({
+        trigger: wrapperRef.current,
+        start: "top top",
+        end: "bottom bottom",
+        scrub: 0.6,
+        onUpdate: (self) => {
+          const p = self.progress;
 
-            if (progressBarRef.current) {
-              gsap.set(progressBarRef.current, { scaleX: p });
-            }
+          // Update video time
+          if (video.duration && !isNaN(video.duration)) {
+            video.currentTime = p * video.duration;
+          }
 
-            // Find active keyframe
-            let active = 0;
-            KEYFRAMES.forEach((kf, i) => {
-              if (p >= kf.progress) active = i;
-            });
+          // Progress bar
+          if (progressBarRef.current) {
+            gsap.set(progressBarRef.current, { scaleX: p });
+          }
+
+          // Active keyframe
+          let active = 0;
+          KEYFRAMES.forEach((kf, i) => {
+            if (p >= kf.progress) active = i;
+          });
+
+          if (active !== activeKFRef.current) {
+            activeKFRef.current = active;
             setActiveKF(active);
-          },
-        });
-      }, wrapperRef);
+          }
 
-      return () => ctx.revert();
+          const pct = Math.round(p * 100);
+          if (pct !== scrollPctRef.current) {
+            scrollPctRef.current = pct;
+            setScrollPct(pct);
+          }
+        },
+      });
     };
 
-    if (video.readyState >= 1) init();
-    else video.addEventListener("loadedmetadata", init, { once: true });
+    if (video.readyState >= 1) {
+      setupScrub();
+    } else {
+      video.addEventListener("loadedmetadata", setupScrub, { once: true });
+    }
 
-    return () => video.removeEventListener("loadedmetadata", init);
+    return () => {
+      scrollTriggerInstance?.kill();
+      video.removeEventListener("loadedmetadata", setupScrub);
+    };
   }, []);
 
   const kf = KEYFRAMES[activeKF];
 
   return (
-    <div ref={wrapperRef} className="scrub-container relative" style={{ height: "500vh" }}>
+    /* 500vh scroll container — sticky video inside */
+    <div ref={wrapperRef} className="relative" style={{ height: "500vh" }}>
       <div
-        ref={stickyRef}
         className="sticky top-0 w-full h-screen overflow-hidden"
-        style={{ background: "#060606" }}
+        style={{ background: "#070707" }}
       >
-        {/* Main scrubbing video */}
+        {/* Video — no willChange to preserve HD quality */}
         <video
           ref={videoRef}
           className="absolute inset-0 w-full h-full object-cover"
@@ -154,83 +171,87 @@ export default function VideoScrubSection() {
           muted
           playsInline
           preload="auto"
-          style={{ willChange: "transform" }}
         />
 
-        {/* Canvas for frame extraction (hidden) */}
-        <canvas ref={canvasRef} className="hidden" />
-
-        {/* Dynamic gradient overlay */}
-        <motion.div
+        {/* Gradients */}
+        <div
           className="absolute inset-0"
-          animate={{
-            background: `linear-gradient(180deg, rgba(8,8,8,0.6) 0%, transparent 28%, transparent 62%, rgba(8,8,8,0.85) 100%)`,
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(7,7,7,0.65) 0%, transparent 25%, transparent 60%, rgba(7,7,7,0.92) 100%)",
           }}
-          transition={{ duration: 0.8 }}
         />
         <div
           className="absolute inset-0"
           style={{
-            background: "linear-gradient(90deg, rgba(8,8,8,0.85) 0%, rgba(8,8,8,0.2) 45%, transparent 100%)",
+            background:
+              "linear-gradient(90deg, rgba(7,7,7,0.88) 0%, rgba(7,7,7,0.18) 40%, transparent 100%)",
           }}
         />
 
-        {/* Animated accent color overlay keyed to keyframe */}
+        {/* Accent tint per chapter */}
         <motion.div
           className="absolute inset-0 pointer-events-none"
           animate={{
-            background: `radial-gradient(ellipse 60% 60% at 80% 50%, ${kf.accent}08 0%, transparent 70%)`,
+            background: `radial-gradient(ellipse 55% 55% at 80% 50%, ${kf.accent}0a 0%, transparent 70%)`,
           }}
-          transition={{ duration: 1.2 }}
+          transition={{ duration: 1.4 }}
         />
 
-        {/* ── Keyframe text panel ── */}
-        <div className="absolute inset-0 flex flex-col justify-end pb-20 px-8 md:px-16 lg:px-24 pointer-events-none">
+        {/* ── Keyframe text ── */}
+        <div
+          className="absolute inset-0 flex flex-col justify-end pointer-events-none"
+          style={{
+            paddingBottom: "clamp(60px, 8vh, 100px)",
+            paddingLeft: "clamp(28px, 6vw, 96px)",
+          }}
+        >
           <AnimatePresence mode="wait">
             <motion.div
               key={activeKF}
-              initial={{ opacity: 0, y: 50, filter: "blur(8px)" }}
+              initial={{ opacity: 0, y: 40, filter: "blur(12px)" }}
               animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              exit={{ opacity: 0, y: -30, filter: "blur(8px)" }}
-              transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
-              className="flex flex-col gap-5 max-w-xl"
+              exit={{ opacity: 0, y: -24, filter: "blur(10px)" }}
+              transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
+              className="flex flex-col gap-6 max-w-2xl"
             >
               {/* Chapter label */}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4">
                 <motion.span
                   style={{
-                    fontFamily: "var(--font-inter)",
+                    fontFamily: "var(--font-body)",
                     fontSize: "10px",
-                    letterSpacing: "0.45em",
+                    letterSpacing: "0.48em",
                     color: kf.accent,
                     fontWeight: 400,
                     textTransform: "uppercase",
                   }}
-                  initial={{ opacity: 0, x: -20 }}
+                  initial={{ opacity: 0, x: -16 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 }}
+                  transition={{ delay: 0.18 }}
                 >
                   {kf.number} — {kf.label}
                 </motion.span>
                 <motion.span
                   className="inline-block h-px"
-                  style={{ background: kf.accent, opacity: 0.6 }}
+                  style={{ background: kf.accent, opacity: 0.55 }}
                   initial={{ width: 0 }}
-                  animate={{ width: 32 }}
-                  transition={{ delay: 0.3, duration: 0.5 }}
+                  animate={{ width: 28 }}
+                  transition={{ delay: 0.28, duration: 0.5 }}
                 />
               </div>
 
               {/* Title */}
               <h2
                 style={{
-                  fontFamily: "var(--font-inter)",
-                  fontSize: "clamp(44px, 7.5vw, 108px)",
-                  fontWeight: 200,
-                  lineHeight: 1.0,
-                  letterSpacing: "-0.028em",
-                  color: "#f5f5f5",
+                  fontFamily: "var(--font-display)",
+                  fontSize: "clamp(48px, 8vw, 116px)",
+                  fontWeight: 300,
+                  lineHeight: 0.95,
+                  letterSpacing: "-0.025em",
+                  color: "#f0ede8",
                   whiteSpace: "pre-line",
+                  fontStyle: "italic",
                 }}
               >
                 {kf.title}
@@ -239,11 +260,12 @@ export default function VideoScrubSection() {
               {/* Body */}
               <p
                 style={{
-                  fontSize: "14px",
+                  fontFamily: "var(--font-body)",
+                  fontSize: "15px",
                   fontWeight: 300,
-                  lineHeight: 1.85,
-                  color: "rgba(245,245,245,0.55)",
-                  maxWidth: "360px",
+                  lineHeight: 1.9,
+                  color: "rgba(240,237,232,0.50)",
+                  maxWidth: "400px",
                 }}
               >
                 {kf.body}
@@ -251,62 +273,73 @@ export default function VideoScrubSection() {
 
               {/* Accent line */}
               <motion.div
-                style={{ height: 1, background: `linear-gradient(90deg, ${kf.accent}, transparent)` }}
-                initial={{ scaleX: 0 }}
+                style={{
+                  height: 1,
+                  background: `linear-gradient(90deg, ${kf.accent}, transparent)`,
+                  maxWidth: "240px",
+                }}
+                initial={{ scaleX: 0, transformOrigin: "left" }}
                 animate={{ scaleX: 1 }}
-                transition={{ delay: 0.4, duration: 0.8 }}
+                transition={{ delay: 0.38, duration: 0.9 }}
               />
             </motion.div>
           </AnimatePresence>
         </div>
 
-        {/* ── Extracted frames mini gallery (right side 3D stack) ── */}
+        {/* ── Captured frame thumbnails (right side) ── */}
         {capturedFrames.length > 0 && (
-          <div className="absolute right-8 md:right-16 top-1/2 -translate-y-1/2 flex flex-col gap-3 z-20">
+          <div
+            className="absolute top-1/2 -translate-y-1/2 flex flex-col gap-4 z-20"
+            style={{ right: "clamp(28px, 5vw, 80px)" }}
+          >
             {capturedFrames.map((src, i) => (
               <motion.div
                 key={i}
-                className="relative overflow-hidden cursor-pointer"
-                style={{
-                  width: 88,
-                  height: 50,
-                  perspective: 600,
-                  transformStyle: "preserve-3d",
-                }}
+                className="relative overflow-hidden"
+                style={{ width: 96, height: 54, borderRadius: 2, cursor: "pointer" }}
                 animate={{
-                  scale: i === activeKF ? 1.18 : 0.88,
-                  opacity: i === activeKF ? 1 : 0.35,
-                  rotateY: i === activeKF ? 0 : 8,
-                  x: i === activeKF ? -8 : 0,
-                  boxShadow: i === activeKF ? `0 0 20px ${KEYFRAMES[i].accent}60, 0 0 0 1px ${KEYFRAMES[i].accent}` : "none",
+                  scale: i === activeKF ? 1.14 : 0.85,
+                  opacity: i === activeKF ? 1 : 0.32,
+                  x: i === activeKF ? -10 : 0,
                 }}
-                transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
-                whileHover={{ scale: 1.12, opacity: 0.9 }}
+                transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={src}
-                  alt={`Frame ${i + 1}`}
+                  alt={`Chapter ${i + 1}`}
                   className="w-full h-full object-cover"
-                  style={{ filter: i === activeKF ? "none" : "grayscale(60%)" }}
+                  style={{
+                    filter: i === activeKF ? "none" : "grayscale(70%) brightness(0.6)",
+                    display: "block",
+                  }}
                 />
-                {/* Active indicator */}
+                {/* Gold border when active */}
                 {i === activeKF && (
                   <motion.div
-                    className="absolute bottom-0 left-0 right-0 h-0.5"
-                    style={{ background: KEYFRAMES[i].accent }}
-                    layoutId="frameIndicator"
+                    className="absolute inset-0 pointer-events-none"
+                    style={{ border: `1px solid ${KEYFRAMES[i].accent}`, borderRadius: 2 }}
+                    layoutId="activeBorder"
+                    transition={{ duration: 0.4 }}
                   />
                 )}
-                {/* Frame label */}
+                {/* Bottom bar */}
+                {i === activeKF && (
+                  <div
+                    className="absolute bottom-0 left-0 right-0"
+                    style={{ height: 2, background: KEYFRAMES[i].accent }}
+                  />
+                )}
+                {/* Number label */}
                 <div
-                  className="absolute top-1 left-1"
+                  className="absolute top-1.5 left-2"
                   style={{
+                    fontFamily: "var(--font-body)",
                     fontSize: "7px",
-                    letterSpacing: "0.2em",
-                    color: KEYFRAMES[i].accent,
-                    textTransform: "uppercase",
+                    letterSpacing: "0.18em",
+                    color: i === activeKF ? KEYFRAMES[i].accent : "rgba(240,237,232,0.4)",
                     fontWeight: 500,
+                    textTransform: "uppercase",
                   }}
                 >
                   {KEYFRAMES[i].number}
@@ -316,48 +349,41 @@ export default function VideoScrubSection() {
           </div>
         )}
 
-        {/* ── Scroll progress arc ── */}
-        <div className="absolute top-1/2 -translate-y-1/2 left-6 flex flex-col items-center gap-2 z-20">
-          <svg width="36" height="200" viewBox="0 0 36 200">
-            {/* Track */}
-            <line x1="18" y1="0" x2="18" y2="200" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
-            {/* Progress */}
+        {/* ── Vertical scroll progress (left side) ── */}
+        <div
+          className="absolute top-1/2 -translate-y-1/2 flex flex-col items-center gap-3 z-20"
+          style={{ left: "clamp(12px, 2vw, 24px)" }}
+        >
+          <svg width="24" height="180" viewBox="0 0 24 180" fill="none">
+            <line x1="12" y1="0" x2="12" y2="180" stroke="rgba(240,237,232,0.07)" strokeWidth="1" />
             <motion.line
-              x1="18" y1="0" x2="18" y2="200"
-              stroke="url(#progressGrad)"
-              strokeWidth="2"
+              x1="12" y1="0" x2="12" y2="180"
+              stroke={kf.accent}
+              strokeWidth="1.5"
               strokeLinecap="round"
-              strokeDasharray="200"
-              animate={{ strokeDashoffset: 200 - scrollPct * 2 }}
+              strokeDasharray="180"
+              animate={{ strokeDashoffset: 180 - scrollPct * 1.8 }}
               transition={{ duration: 0 }}
             />
-            {/* Dots for each keyframe */}
-            {KEYFRAMES.map((kf, i) => (
+            {KEYFRAMES.map((kfItem, i) => (
               <motion.circle
                 key={i}
-                cx="18"
-                cy={kf.progress * 200}
-                r="4"
-                fill={i === activeKF ? kf.accent : "rgba(255,255,255,0.15)"}
-                stroke={kf.accent}
+                cx="12"
+                cy={kfItem.progress * 180}
+                r={i === activeKF ? 4 : 3}
+                fill={i === activeKF ? kfItem.accent : "transparent"}
+                stroke={kfItem.accent}
                 strokeWidth="1"
-                animate={{ r: i === activeKF ? 5 : 3 }}
-                transition={{ duration: 0.3 }}
+                animate={{ r: i === activeKF ? 4.5 : 2.5, opacity: i === activeKF ? 1 : 0.5 }}
+                transition={{ duration: 0.4 }}
               />
             ))}
-            <defs>
-              <linearGradient id="progressGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#b8962e" />
-                <stop offset="100%" stopColor="#f5d78e" />
-              </linearGradient>
-            </defs>
           </svg>
-          {/* Percentage */}
           <span
-            ref={progressNumRef}
             style={{
-              fontSize: "9px",
-              letterSpacing: "0.1em",
+              fontFamily: "var(--font-body)",
+              fontSize: "8px",
+              letterSpacing: "0.12em",
               color: kf.accent,
               fontVariantNumeric: "tabular-nums",
             }}
@@ -366,84 +392,65 @@ export default function VideoScrubSection() {
           </span>
         </div>
 
-        {/* ── 3D floating spec badge ── */}
-        <motion.div
-          className="absolute top-8 right-1/2 translate-x-1/2 md:translate-x-0 md:right-[calc(8rem+120px)] flex flex-col items-center gap-1"
-          animate={{ y: [0, -8, 0], rotateX: [0, 5, 0] }}
-          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-          style={{ perspective: 400 }}
-        >
-          <div
-            style={{
-              border: `1px solid ${kf.accent}40`,
-              padding: "6px 16px",
-              background: "rgba(8,8,8,0.6)",
-              backdropFilter: "blur(8px)",
-            }}
-          >
-            <AnimatePresence mode="wait">
-              <motion.span
-                key={activeKF}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                style={{
-                  fontSize: "9px",
-                  letterSpacing: "0.35em",
-                  textTransform: "uppercase",
-                  color: kf.accent,
-                  fontWeight: 400,
-                }}
-              >
-                {kf.label}
-              </motion.span>
-            </AnimatePresence>
-          </div>
-        </motion.div>
-
-        {/* ── Progress bar (bottom) ── */}
+        {/* ── Progress bar bottom ── */}
         <div
           className="absolute bottom-0 left-0 right-0"
-          style={{ height: "2px", background: "rgba(255,255,255,0.05)" }}
+          style={{ height: "1px", background: "rgba(240,237,232,0.05)" }}
         >
           <div
             ref={progressBarRef}
             className="h-full"
             style={{
               transformOrigin: "left center",
-              background: `linear-gradient(90deg, ${kf.accent}, #f5d78e)`,
-              transition: "background 0.8s ease",
+              background: `linear-gradient(90deg, ${kf.accent}, #e8c86a)`,
+              transition: "background 0.9s ease",
             }}
           />
         </div>
 
-        {/* Scroll to explore hint */}
-        <div className="absolute top-8 right-8 flex items-center gap-2 opacity-25 z-20">
-          <span style={{ fontSize: "9px", letterSpacing: "0.35em", textTransform: "uppercase", color: "white" }}>
+        {/* Scroll hint — top */}
+        <div
+          className="absolute z-20 flex items-center gap-3"
+          style={{
+            top: "clamp(28px, 4vh, 44px)",
+            right: "clamp(28px, 6vw, 96px)",
+            opacity: scrollPct > 5 ? 0 : 0.4,
+            transition: "opacity 0.6s ease",
+          }}
+        >
+          <span
+            style={{
+              fontFamily: "var(--font-body)",
+              fontSize: "9px",
+              letterSpacing: "0.38em",
+              textTransform: "uppercase",
+              color: "#f0ede8",
+            }}
+          >
             Scroll to explore
           </span>
           <motion.svg
-            width="16" height="10" viewBox="0 0 16 10" fill="none"
-            animate={{ x: [0, 4, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
+            width="14" height="8" viewBox="0 0 16 10" fill="none"
+            animate={{ x: [0, 5, 0] }}
+            transition={{ duration: 1.6, repeat: Infinity }}
           >
             <path d="M0 5 H14 M10 1 L14 5 L10 9" stroke="white" strokeWidth="1" />
           </motion.svg>
         </div>
 
-        {/* Corner frame lines with animation */}
+        {/* Corner marks */}
         {[
-          { className: "top-20 left-8", border: "border-t border-l" },
-          { className: "top-20 right-16", border: "border-t border-r" },
-          { className: "bottom-8 left-8", border: "border-b border-l" },
-          { className: "bottom-8 right-16", border: "border-b border-r" },
-        ].map(({ className, border }, i) => (
+          { pos: "top-20 left-8", b: "border-t border-l" },
+          { pos: "top-20 right-8 md:right-24", b: "border-t border-r" },
+          { pos: "bottom-8 left-8", b: "border-b border-l" },
+          { pos: "bottom-8 right-8 md:right-24", b: "border-b border-r" },
+        ].map(({ pos, b }, i) => (
           <motion.div
             key={i}
-            className={`absolute ${className} w-8 h-8 ${border}`}
-            style={{ borderColor: `${kf.accent}40` }}
-            animate={{ borderColor: `${kf.accent}60`, opacity: [0.4, 0.8, 0.4] }}
-            transition={{ duration: 2, repeat: Infinity, delay: i * 0.2 }}
+            className={`absolute ${pos} w-6 h-6 ${b}`}
+            style={{ borderColor: `${kf.accent}45` }}
+            animate={{ opacity: [0.4, 0.75, 0.4] }}
+            transition={{ duration: 2.5, repeat: Infinity, delay: i * 0.25 }}
           />
         ))}
       </div>

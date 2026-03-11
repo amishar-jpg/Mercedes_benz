@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
@@ -12,162 +12,144 @@ export default function HeroSection() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const eyebrowRef = useRef<HTMLDivElement>(null);
-  const titleLine1Ref = useRef<HTMLDivElement>(null);
-  const titleLine2Ref = useRef<HTMLDivElement>(null);
+  const titleLine1Ref = useRef<HTMLHeadingElement>(null);
+  const titleLine2Ref = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLParagraphElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
   const scrollIndicatorRef = useRef<HTMLDivElement>(null);
   const statsRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
 
+  // Subtle 3D tilt — small values so video stays crisp
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
-  const springX = useSpring(mouseX, { stiffness: 60, damping: 20 });
-  const springY = useSpring(mouseY, { stiffness: 60, damping: 20 });
-  const rotateX = useTransform(springY, [-0.5, 0.5], [8, -8]);
-  const rotateY = useTransform(springX, [-0.5, 0.5], [-8, 8]);
-
-  const [frameLoaded, setFrameLoaded] = useState(false);
-
-  // Extract first frame from video to canvas for a sharp hero still
-  useEffect(() => {
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    if (!video || !canvas) return;
-    const captureFrame = () => {
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
-      canvas.width = video.videoWidth || 1920;
-      canvas.height = video.videoHeight || 1080;
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      setFrameLoaded(true);
-    };
-    if (video.readyState >= 2) captureFrame();
-    else video.addEventListener("loadeddata", captureFrame, { once: true });
-  }, []);
+  const springX = useSpring(mouseX, { stiffness: 40, damping: 18 });
+  const springY = useSpring(mouseY, { stiffness: 40, damping: 18 });
+  const videoRotateX = useTransform(springY, [-0.5, 0.5], [3, -3]);
+  const videoRotateY = useTransform(springX, [-0.5, 0.5], [-3, 3]);
+  const contentRotateX = useTransform(springY, [-0.5, 0.5], [1.5, -1.5]);
+  const contentRotateY = useTransform(springX, [-0.5, 0.5], [-1.5, 1.5]);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ delay: 2.2 });
+      const tl = gsap.timeline({ delay: 2.3 });
 
+      // Video fade in without scale — preserves HD quality
       tl.fromTo(
         videoRef.current,
-        { opacity: 0, scale: 1.12 },
-        { opacity: 1, scale: 1, duration: 2.5, ease: "power2.out" },
+        { opacity: 0 },
+        { opacity: 1, duration: 2.8, ease: "power2.out" },
         0
       );
 
       tl.fromTo(
         overlayRef.current,
         { opacity: 0 },
-        { opacity: 1, duration: 1.8, ease: "power2.inOut" },
-        0.3
+        { opacity: 1, duration: 2, ease: "power2.inOut" },
+        0.2
       );
 
       tl.fromTo(
         eyebrowRef.current,
-        { opacity: 0, y: 24, letterSpacing: "0.05em" },
-        { opacity: 1, y: 0, letterSpacing: "0.42em", duration: 1.2, ease: "power3.out" },
-        0.9
+        { opacity: 0, y: 20, letterSpacing: "0.08em" },
+        { opacity: 1, y: 0, letterSpacing: "0.42em", duration: 1.3, ease: "power3.out" },
+        1.0
       );
 
       tl.fromTo(
         titleLine1Ref.current,
-        { clipPath: "inset(100% 0% 0% 0%)", y: 60, skewY: 4 },
-        { clipPath: "inset(0% 0% 0% 0%)", y: 0, skewY: 0, duration: 1.2, ease: "power4.out" },
-        1.1
+        { clipPath: "inset(100% 0% 0% 0%)", y: 70 },
+        { clipPath: "inset(0% 0% 0% 0%)", y: 0, duration: 1.4, ease: "expo.out" },
+        1.15
       );
 
       tl.fromTo(
         titleLine2Ref.current,
-        { clipPath: "inset(100% 0% 0% 0%)", y: 60, skewY: 4 },
-        { clipPath: "inset(0% 0% 0% 0%)", y: 0, skewY: 0, duration: 1.2, ease: "power4.out" },
-        1.28
+        { clipPath: "inset(100% 0% 0% 0%)", y: 70 },
+        { clipPath: "inset(0% 0% 0% 0%)", y: 0, duration: 1.4, ease: "expo.out" },
+        1.35
       );
 
       tl.fromTo(
         subtitleRef.current,
-        { opacity: 0, y: 28 },
-        { opacity: 1, y: 0, duration: 1, ease: "power3.out" },
-        1.65
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 1.1, ease: "power3.out" },
+        1.75
       );
 
       tl.fromTo(
         ctaRef.current,
         { opacity: 0, y: 24 },
-        { opacity: 1, y: 0, duration: 0.9, ease: "power3.out" },
-        1.85
+        { opacity: 1, y: 0, duration: 1, ease: "power3.out" },
+        1.95
       );
 
       tl.fromTo(
         statsRef.current,
-        { opacity: 0, y: 24 },
-        { opacity: 1, y: 0, duration: 0.9, ease: "power3.out" },
-        2.05
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 1, ease: "power3.out" },
+        2.18
       );
 
       tl.fromTo(
         scrollIndicatorRef.current,
         { opacity: 0 },
         { opacity: 1, duration: 0.6 },
-        2.4
+        2.5
       );
 
       const scrollDot = scrollIndicatorRef.current?.querySelector(".scroll-dot") ?? null;
       gsap.to(scrollDot, {
-        y: 12,
-        duration: 1.4,
+        y: 14,
+        duration: 1.6,
         repeat: -1,
         yoyo: true,
         ease: "power1.inOut",
-        delay: 3.4,
+        delay: 3.5,
       });
 
-      // Parallax on scroll
+      // Subtle parallax on scroll — no scale, just translate
       ScrollTrigger.create({
         trigger: sectionRef.current,
         start: "top top",
         end: "bottom top",
-        scrub: true,
+        scrub: 1.2,
         onUpdate: (self) => {
           gsap.to(videoRef.current, {
-            y: self.progress * 140,
-            scale: 1 + self.progress * 0.08,
+            y: self.progress * 100,
             duration: 0,
           });
           gsap.to(overlayRef.current, {
-            opacity: 0.5 + self.progress * 0.5,
+            opacity: 0.4 + self.progress * 0.6,
             duration: 0,
           });
         },
       });
 
-      // Glow that follows mouse
+      // Mouse-following glow
       const onMouseMove = (e: MouseEvent) => {
         const rect = sectionRef.current?.getBoundingClientRect();
         if (!rect || !glowRef.current) return;
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
         gsap.to(glowRef.current, {
-          x: x - 300,
-          y: y - 300,
-          duration: 0.8,
+          x: e.clientX - rect.left - 250,
+          y: e.clientY - rect.top - 250,
+          duration: 1.2,
           ease: "power2.out",
         });
-        mouseX.set((e.clientX / window.innerWidth - 0.5));
-        mouseY.set((e.clientY / window.innerHeight - 0.5));
+        mouseX.set(e.clientX / window.innerWidth - 0.5);
+        mouseY.set(e.clientY / window.innerHeight - 0.5);
       };
 
-      sectionRef.current?.addEventListener("mousemove", onMouseMove);
-      return () => sectionRef.current?.removeEventListener("mousemove", onMouseMove);
+      const el = sectionRef.current;
+      el?.addEventListener("mousemove", onMouseMove);
+      return () => el?.removeEventListener("mousemove", onMouseMove);
     }, sectionRef);
 
     return () => ctx.revert();
-  }, []);
+  }, [mouseX, mouseY]);
 
   const heroStats = [
-    { value: "3.5s", label: "0-100 km/h" },
+    { value: "3.5s", label: "0–100 km/h" },
     { value: "V8", label: "AMG Biturbo" },
     { value: "510", label: "Horsepower" },
     { value: "700", label: "Nm Torque" },
@@ -177,26 +159,27 @@ export default function HeroSection() {
     <section
       ref={sectionRef}
       className="relative h-screen w-full overflow-hidden"
-      style={{ perspective: "1200px" }}
     >
-      {/* Mouse-following glow orb */}
+      {/* Mouse glow */}
       <div
         ref={glowRef}
         className="absolute pointer-events-none z-20"
         style={{
-          width: 600,
-          height: 600,
+          width: 500,
+          height: 500,
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(184,150,46,0.12) 0%, transparent 70%)",
-          filter: "blur(40px)",
+          background: "radial-gradient(circle, rgba(184,150,46,0.10) 0%, transparent 65%)",
+          filter: "blur(60px)",
           willChange: "transform",
+          top: 0,
+          left: 0,
         }}
       />
 
-      {/* Background video with 3D tilt */}
+      {/* Video — HD quality preserved: no scale transform */}
       <motion.div
         className="absolute inset-0"
-        style={{ rotateX, rotateY, scale: 1.04 }}
+        style={{ rotateX: videoRotateX, rotateY: videoRotateY, scale: 1.0 }}
       >
         <video
           ref={videoRef}
@@ -207,91 +190,98 @@ export default function HeroSection() {
           loop
           playsInline
           preload="auto"
+          style={{ imageRendering: "auto" }}
         />
       </motion.div>
 
-      {/* Canvas frame snapshot — hidden, used for 3D scene */}
-      <canvas ref={canvasRef} className="hidden" />
-
-      {/* Cinematic gradient overlays */}
+      {/* Gradient overlays */}
       <div
         ref={overlayRef}
         className="absolute inset-0 opacity-0 z-10"
         style={{
           background:
-            "linear-gradient(180deg, rgba(8,8,8,0.8) 0%, rgba(8,8,8,0.15) 35%, rgba(8,8,8,0.15) 60%, rgba(8,8,8,0.92) 100%)",
+            "linear-gradient(180deg, rgba(7,7,7,0.72) 0%, rgba(7,7,7,0.10) 30%, rgba(7,7,7,0.08) 55%, rgba(7,7,7,0.94) 100%)",
         }}
       />
-      {/* Side vignettes */}
       <div
         className="absolute inset-0 pointer-events-none z-10"
         style={{
           background:
-            "linear-gradient(90deg, rgba(8,8,8,0.7) 0%, transparent 35%, transparent 65%, rgba(8,8,8,0.4) 100%)",
+            "linear-gradient(90deg, rgba(7,7,7,0.65) 0%, transparent 38%, transparent 62%, rgba(7,7,7,0.35) 100%)",
         }}
       />
 
-      {/* Scanlines effect */}
-      <div
-        className="absolute inset-0 pointer-events-none z-30 opacity-[0.025]"
-        style={{
-          backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,1) 2px, rgba(255,255,255,1) 3px)",
-        }}
-      />
-
-      {/* 3D floating content */}
+      {/* Content wrapper with subtle 3D tilt */}
       <motion.div
-        className="relative z-40 flex h-full flex-col justify-end pb-20 px-8 md:px-16 lg:px-24"
-        style={{ rotateX: useTransform(springY, [-0.5, 0.5], [2, -2]), rotateY: useTransform(springX, [-0.5, 0.5], [-2, 2]) }}
+        className="relative z-40 flex h-full flex-col justify-end"
+        style={{
+          paddingBottom: "clamp(60px, 8vh, 100px)",
+          paddingLeft: "clamp(28px, 6vw, 96px)",
+          paddingRight: "clamp(28px, 6vw, 96px)",
+          rotateX: contentRotateX,
+          rotateY: contentRotateY,
+        }}
       >
         {/* Eyebrow */}
         <div
           ref={eyebrowRef}
-          className="opacity-0 mb-6 flex items-center gap-4"
+          className="opacity-0 mb-8 flex items-center gap-5"
         >
           <span
-            className="text-[#b8962e]"
-            style={{ fontSize: "10px", letterSpacing: "0.42em", fontWeight: 400, textTransform: "uppercase" }}
+            style={{
+              fontFamily: "var(--font-body)",
+              fontSize: "10px",
+              letterSpacing: "0.42em",
+              color: "#b8962e",
+              fontWeight: 400,
+              textTransform: "uppercase",
+            }}
           >
             The New Generation
           </span>
-          <span className="inline-block w-12 h-px bg-[#b8962e]" />
+          <span className="inline-block w-10 h-px bg-[#b8962e] opacity-70" />
           <span
-            className="text-white/40"
-            style={{ fontSize: "10px", letterSpacing: "0.3em", fontWeight: 300, textTransform: "uppercase" }}
+            style={{
+              fontFamily: "var(--font-body)",
+              fontSize: "10px",
+              letterSpacing: "0.3em",
+              color: "rgba(240,237,232,0.35)",
+              fontWeight: 300,
+              textTransform: "uppercase",
+            }}
           >
             2026
           </span>
         </div>
 
-        {/* Big headline */}
+        {/* Headline */}
         <div className="mb-4 overflow-hidden">
           <h1
             ref={titleLine1Ref}
             style={{
-              fontFamily: "var(--font-inter)",
-              fontSize: "clamp(54px, 9.5vw, 148px)",
-              fontWeight: 200,
-              letterSpacing: "-0.025em",
-              lineHeight: 0.93,
+              fontFamily: "var(--font-display)",
+              fontSize: "clamp(60px, 10vw, 156px)",
+              fontWeight: 300,
+              letterSpacing: "-0.02em",
+              lineHeight: 0.92,
               clipPath: "inset(100% 0% 0% 0%)",
-              color: "#f5f5f5",
+              color: "#f0ede8",
             }}
           >
             Mercedes
           </h1>
         </div>
-        <div className="mb-8 overflow-hidden">
+        <div className="mb-10 overflow-hidden">
           <h1
             ref={titleLine2Ref}
             style={{
-              fontFamily: "var(--font-inter)",
-              fontSize: "clamp(54px, 9.5vw, 148px)",
-              fontWeight: 800,
+              fontFamily: "var(--font-display)",
+              fontSize: "clamp(60px, 10vw, 156px)",
+              fontWeight: 700,
               letterSpacing: "-0.025em",
-              lineHeight: 0.93,
+              lineHeight: 0.92,
               clipPath: "inset(100% 0% 0% 0%)",
-              background: "linear-gradient(135deg, #ffffff 0%, #d4a843 40%, #f5d78e 70%, #b8962e 100%)",
+              background: "linear-gradient(110deg, #f0ede8 0%, #e8c86a 38%, #b8962e 65%, #c8a030 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
@@ -304,55 +294,83 @@ export default function HeroSection() {
         {/* Subtitle */}
         <p
           ref={subtitleRef}
-          className="opacity-0 mb-10 text-white/50 max-w-md"
-          style={{ fontSize: "15px", fontWeight: 300, lineHeight: 1.85, letterSpacing: "0.025em" }}
+          className="opacity-0 mb-12 max-w-lg"
+          style={{
+            fontFamily: "var(--font-body)",
+            fontSize: "16px",
+            fontWeight: 300,
+            lineHeight: 1.9,
+            letterSpacing: "0.02em",
+            color: "rgba(240,237,232,0.50)",
+          }}
         >
           Where engineering transcends art. Every detail sculpted for those
           who demand nothing short of perfection.
         </p>
 
         {/* CTA Buttons */}
-        <div ref={ctaRef} className="opacity-0 flex flex-wrap items-center gap-5 mb-16">
+        <div ref={ctaRef} className="opacity-0 flex flex-wrap items-center gap-6 mb-20">
+          {/* Primary — no overflow:hidden on motion.a, use inner wrapper instead */}
           <motion.a
             href="#configure"
-            className="group relative flex items-center gap-3 px-9 py-4 overflow-hidden"
+            className="group relative flex items-center gap-4"
             style={{
-              background: "linear-gradient(135deg, #b8962e, #d4a843)",
-              color: "#080808",
-              fontSize: "11px",
-              letterSpacing: "0.25em",
-              fontWeight: 700,
+              background: "linear-gradient(110deg, #b8962e, #d4a843)",
+              color: "#070707",
+              fontFamily: "var(--font-body)",
+              fontSize: "14px",
+              letterSpacing: "0.1em",
+              fontWeight: 600,
               textTransform: "uppercase",
+              overflow: "hidden",
+              padding: "16px 36px",
+              borderRadius: "4px",
             }}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: 0.2 }}
           >
-            <span className="relative z-10">Configure Now</span>
+            <span className="relative z-10 whitespace-nowrap" style={{ color: "#070707" }}>
+              Configure Now
+            </span>
             <motion.span
               className="relative z-10"
-              animate={{ x: [0, 4, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
+              animate={{ x: [0, 5, 0] }}
+              transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+              style={{ color: "#070707" }}
             >
               →
             </motion.span>
+            {/* Fill on hover — ensure z-index is below text */}
             <span
-              className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500"
-              style={{ background: "linear-gradient(135deg, #d4a843, #f5d78e)" }}
+              className="absolute inset-0 translate-x-[-101%] group-hover:translate-x-0 transition-transform duration-500 ease-out"
+              style={{ background: "linear-gradient(110deg, #d4a843, #e8c86a)", zIndex: 0 }}
             />
           </motion.a>
 
+          {/* Secondary */}
           <motion.a
-            href="#discover"
-            className="flex items-center gap-3 px-9 py-4 border border-white/20 hover:border-white/60 transition-all duration-400 backdrop-blur-sm"
+            href="#models"
+            className="flex items-center gap-4"
             style={{
-              color: "#f5f5f5",
-              fontSize: "11px",
-              letterSpacing: "0.25em",
-              fontWeight: 400,
+              border: "1px solid rgba(240,237,232,0.20)",
+              color: "rgba(240,237,232,0.85)",
+              fontFamily: "var(--font-body)",
+              fontSize: "14px",
+              letterSpacing: "0.1em",
+              fontWeight: 500,
               textTransform: "uppercase",
+              backdropFilter: "blur(10px)",
+              padding: "16px 36px",
+              borderRadius: "4px",
             }}
-            whileHover={{ scale: 1.03, borderColor: "rgba(184,150,46,0.6)" }}
-            whileTap={{ scale: 0.97 }}
+            whileHover={{
+              scale: 1.02,
+              borderColor: "rgba(184,150,46,0.55)",
+              color: "#f0ede8",
+            }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: 0.2 }}
           >
             Discover More
           </motion.a>
@@ -361,21 +379,24 @@ export default function HeroSection() {
         {/* Stats bar */}
         <div
           ref={statsRef}
-          className="opacity-0 flex items-center gap-0 border-t border-white/10 pt-8"
+          className="opacity-0 flex items-center border-t pt-8"
+          style={{ borderColor: "rgba(240,237,232,0.08)" }}
         >
-          {heroStats.map((stat) => (
+          {heroStats.map((stat, i) => (
             <motion.div
               key={stat.label}
-              className="flex-1 border-r border-white/10 last:border-r-0 pr-8 mr-8 last:pr-0 last:mr-0"
+              className="flex-1 border-r last:border-r-0 pr-8 mr-8 last:pr-0 last:mr-0"
+              style={{ borderColor: "rgba(240,237,232,0.08)" }}
               whileHover={{ y: -4 }}
               transition={{ duration: 0.3 }}
             >
               <div
                 className="stat-number"
                 style={{
-                  fontSize: "clamp(22px, 3vw, 40px)",
-                  fontWeight: 200,
-                  color: "#f5f5f5",
+                  fontFamily: "var(--font-display)",
+                  fontSize: "clamp(24px, 3.2vw, 42px)",
+                  fontWeight: 300,
+                  color: "#f0ede8",
                   letterSpacing: "-0.02em",
                   lineHeight: 1,
                 }}
@@ -383,8 +404,14 @@ export default function HeroSection() {
                 {stat.value}
               </div>
               <div
-                className="mt-1 text-white/40 uppercase"
-                style={{ fontSize: "9px", letterSpacing: "0.3em", fontWeight: 400 }}
+                className="mt-1.5 uppercase"
+                style={{
+                  fontFamily: "var(--font-body)",
+                  fontSize: "9px",
+                  letterSpacing: "0.32em",
+                  fontWeight: 400,
+                  color: "rgba(240,237,232,0.35)",
+                }}
               >
                 {stat.label}
               </div>
@@ -396,55 +423,62 @@ export default function HeroSection() {
       {/* Scroll indicator */}
       <div
         ref={scrollIndicatorRef}
-        className="absolute right-8 bottom-24 opacity-0 flex flex-col items-center gap-3 z-40"
+        className="absolute right-10 bottom-28 opacity-0 flex flex-col items-center gap-4 z-40"
       >
         <div
-          className="text-white/30 uppercase"
-          style={{ fontSize: "9px", letterSpacing: "0.35em", writingMode: "vertical-rl" }}
+          style={{
+            fontFamily: "var(--font-body)",
+            fontSize: "8px",
+            letterSpacing: "0.4em",
+            writingMode: "vertical-rl",
+            color: "rgba(240,237,232,0.28)",
+            textTransform: "uppercase",
+          }}
         >
           Scroll
         </div>
-        <div className="w-px h-16 bg-white/10 relative overflow-hidden">
+        <div className="w-px h-20 relative overflow-hidden" style={{ background: "rgba(240,237,232,0.08)" }}>
           <div
-            className="scroll-dot absolute top-0 left-0 w-full h-5 bg-gradient-to-b from-[#b8962e] to-transparent"
+            className="scroll-dot absolute top-0 left-0 w-full h-6"
+            style={{ background: "linear-gradient(180deg, #b8962e, transparent)" }}
           />
         </div>
       </div>
 
-      {/* Corner decoration */}
+      {/* Corner accent — top right */}
       <motion.div
-        className="absolute top-24 right-8 md:right-16 z-40"
-        animate={{ opacity: [0.2, 0.5, 0.2], rotate: [0, 90, 0] }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute top-28 right-10 md:right-20 z-40"
+        animate={{ opacity: [0.25, 0.55, 0.25] }}
+        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
       >
-        <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
-          <path d="M60 0 L60 60 L0 60" stroke="#b8962e" strokeWidth="0.5" fill="none" />
-          <path d="M50 0 L50 50 L0 50" stroke="#b8962e" strokeWidth="0.3" fill="none" opacity="0.4" />
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+          <path d="M48 0 L48 48 L0 48" stroke="#b8962e" strokeWidth="0.6" fill="none" />
+          <path d="M40 0 L40 40 L0 40" stroke="#b8962e" strokeWidth="0.3" fill="none" opacity="0.4" />
         </svg>
       </motion.div>
 
-      {/* Floating gold particles */}
-      {[...Array(8)].map((_, i) => (
+      {/* Subtle floating particles */}
+      {[...Array(6)].map((_, i) => (
         <motion.div
           key={i}
-          className="absolute pointer-events-none z-30"
+          className="absolute pointer-events-none z-20"
           style={{
-            width: Math.random() * 3 + 1,
-            height: Math.random() * 3 + 1,
+            width: 2,
+            height: 2,
             borderRadius: "50%",
             background: "#b8962e",
-            left: `${10 + i * 12}%`,
-            bottom: `${20 + (i % 3) * 15}%`,
+            left: `${15 + i * 14}%`,
+            bottom: `${25 + (i % 3) * 12}%`,
+            opacity: 0.4,
           }}
           animate={{
-            y: [0, -30, 0],
-            opacity: [0.2, 0.8, 0.2],
-            scale: [1, 1.5, 1],
+            y: [0, -28, 0],
+            opacity: [0.15, 0.55, 0.15],
           }}
           transition={{
-            duration: 3 + i * 0.7,
+            duration: 4 + i * 0.8,
             repeat: Infinity,
-            delay: i * 0.5,
+            delay: i * 0.7,
             ease: "easeInOut",
           }}
         />

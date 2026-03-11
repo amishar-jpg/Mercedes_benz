@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, DM_Sans } from "next/font/google";
+import { Cormorant_Garamond, Montserrat } from "next/font/google";
 import "./globals.css";
 
-const cormorant = Cormorant_Garamond({
+// Premium display font — classic, elegant, luxury
+const garamond = Cormorant_Garamond({
   subsets: ["latin"],
   variable: "--font-display",
   weight: ["300", "400", "500", "600", "700"],
   style: ["normal", "italic"],
 });
 
-const dmSans = DM_Sans({
+// Clean geometric sans — modern, highly readable, premium
+const montserrat = Montserrat({
   subsets: ["latin"],
   variable: "--font-body",
   weight: ["200", "300", "400", "500", "600", "700"],
@@ -28,7 +30,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${cormorant.variable} ${dmSans.variable} antialiased`}>
+      <body className={`${garamond.variable} ${montserrat.variable} antialiased`}>
         {children}
       </body>
     </html>
