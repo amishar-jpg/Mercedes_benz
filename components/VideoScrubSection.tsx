@@ -55,7 +55,7 @@ export default function VideoScrubSection() {
   // Extract frames from video
   useEffect(() => {
     const video = document.createElement("video");
-    video.src = "/hero.mp4";
+    video.src = "/firefly.mp4";
     video.muted = true;
     video.preload = "metadata";
 
@@ -167,7 +167,7 @@ export default function VideoScrubSection() {
         <video
           ref={videoRef}
           className="absolute inset-0 w-full h-full object-cover"
-          src="/hero.mp4"
+          src="/firefly.mp4"
           muted
           playsInline
           preload="auto"

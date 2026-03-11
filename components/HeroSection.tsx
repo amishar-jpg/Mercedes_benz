@@ -82,22 +82,31 @@ export default function HeroSection() {
         2.18
       );
 
-      // Subtle parallax on scroll — no scale, just translate
-      ScrollTrigger.create({
-        trigger: sectionRef.current,
-        start: "top top",
-        end: "bottom top",
-        scrub: 1.2,
-        onUpdate: (self) => {
-          gsap.to(videoRef.current, {
-            y: self.progress * 100,
-            duration: 0,
-          });
-          gsap.to(overlayRef.current, {
-            opacity: 0.4 + self.progress * 0.6,
-            duration: 0,
-          });
+      // Animated rotation, scroll down into next page
+      gsap.to(videoRef.current, {
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top top",
+          end: "bottom top",
+          scrub: 1.5,
+          pin: false,
         },
+        y: () => window.innerHeight,
+        rotationZ: 720,
+        scale: 0.15,
+        opacity: 0,
+        borderRadius: "40px",
+        ease: "power2.inOut",
+      });
+
+      gsap.to(overlayRef.current, {
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top top",
+          end: "bottom top",
+          scrub: true,
+        },
+        opacity: 1,
       });
 
       // Mouse-following glow
@@ -132,7 +141,8 @@ export default function HeroSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative h-screen w-full overflow-hidden"
+      className="relative h-screen w-full"
+      style={{ zIndex: 10 }}
     >
       {/* Mouse glow */}
       <div
@@ -158,13 +168,13 @@ export default function HeroSection() {
         <video
           ref={videoRef}
           className="absolute inset-0 w-full h-full object-cover opacity-0"
-          src="/hero.mp4"
+          src="/firefly.mp4"
           autoPlay
           muted
           loop
           playsInline
           preload="auto"
-          style={{ imageRendering: "auto" }}
+          style={{ imageRendering: "auto", willChange: "transform, opacity, border-radius" }}
         />
       </motion.div>
 
