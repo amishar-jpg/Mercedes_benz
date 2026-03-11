@@ -172,10 +172,10 @@ export default function CTASection() {
             <h2
               style={{
                 fontFamily: "var(--font-display)",
-                fontSize: "clamp(52px, 11vw, 170px)",
+                fontSize: "clamp(40px, 6vw, 80px)",
                 fontWeight: 300,
-                letterSpacing: "-0.03em",
-                lineHeight: 0.88,
+                letterSpacing: "-0.02em",
+                lineHeight: 0.95,
                 color: "#f0ede8",
                 fontStyle: "italic",
               }}

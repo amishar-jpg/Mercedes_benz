@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Lenis from "@studio-freight/lenis";
 import Loader from "@/components/Loader";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
@@ -19,6 +20,26 @@ export default function Home() {
   const followerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Scroll to top on refresh
+    window.scrollTo(0, 0);
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+
+    // Initialize smooth scrolling with Lenis
+    const lenis = new Lenis({
+      lerp: 0.08, // Adjust for smoothness vs responsiveness
+      smoothWheel: true,
+    });
+
+    lenis.on("scroll", ScrollTrigger.update);
+
+    gsap.ticker.add((time) => {
+      lenis.raf(time * 1000);
+    });
+
+    gsap.ticker.lagSmoothing(0, 0);
+
     const cursor = cursorRef.current;
     const follower = followerRef.current;
     if (!cursor || !follower) return;
@@ -59,6 +80,10 @@ export default function Home() {
 
     return () => {
       window.removeEventListener("mousemove", onMove);
+      gsap.ticker.remove((time) => {
+        lenis.raf(time * 1000);
+      });
+      lenis.destroy();
     };
   }, [loaded]);
 

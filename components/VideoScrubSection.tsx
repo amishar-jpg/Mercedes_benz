@@ -108,7 +108,7 @@ export default function VideoScrubSection() {
         trigger: wrapperRef.current,
         start: "top top",
         end: "bottom bottom",
-        scrub: 0.6,
+        scrub: 2.5,
         onUpdate: (self) => {
           const p = self.progress;
 

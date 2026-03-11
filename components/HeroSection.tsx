@@ -82,31 +82,22 @@ export default function HeroSection() {
         2.18
       );
 
-      // Animated rotation, scroll down into next page
-      gsap.to(videoRef.current, {
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top top",
-          end: "bottom top",
-          scrub: 1.5,
-          pin: false,
+      // Subtle parallax on scroll — no scale, just translate
+      ScrollTrigger.create({
+        trigger: sectionRef.current,
+        start: "top top",
+        end: "bottom top",
+        scrub: 1.2,
+        onUpdate: (self) => {
+          gsap.to(videoRef.current, {
+            y: self.progress * 100,
+            duration: 0,
+          });
+          gsap.to(overlayRef.current, {
+            opacity: 0.4 + self.progress * 0.6,
+            duration: 0,
+          });
         },
-        y: () => window.innerHeight,
-        rotationZ: 720,
-        scale: 0.15,
-        opacity: 0,
-        borderRadius: "40px",
-        ease: "power2.inOut",
-      });
-
-      gsap.to(overlayRef.current, {
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top top",
-          end: "bottom top",
-          scrub: true,
-        },
-        opacity: 1,
       });
 
       // Mouse-following glow
@@ -174,7 +165,7 @@ export default function HeroSection() {
           loop
           playsInline
           preload="auto"
-          style={{ imageRendering: "auto", willChange: "transform, opacity, border-radius" }}
+          style={{ imageRendering: "auto" }}
         />
       </motion.div>
 
