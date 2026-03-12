@@ -1,20 +1,39 @@
 import type { Metadata } from "next";
-import { Poppins, Inter } from "next/font/google";
+import { Poppins, Inter, Cormorant_Garamond, DM_Sans } from "next/font/google";
 import "./globals.css";
 
-// Premium modern display font
+// Premium editorial serif for navbar brand wordmark
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  variable: "--font-cormorant",
+  weight: ["300", "400", "500", "600"],
+  style: ["normal", "italic"],
+  display: "swap",
+});
+
+// Clean geometric sans for nav links + UI labels
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  variable: "--font-dm-sans",
+  weight: ["200", "300", "400", "500", "600"],
+  display: "swap",
+});
+
+// Premium modern display font (existing)
 const poppins = Poppins({
   subsets: ["latin"],
   variable: "--font-display",
   weight: ["300", "400", "500", "600", "700"],
   style: ["normal", "italic"],
+  display: "swap",
 });
 
-// Clean geometric sans for body
+// Clean geometric sans for body (existing)
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-body",
   weight: ["200", "300", "400", "500", "600", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -30,7 +49,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${poppins.variable} ${inter.variable} antialiased`}>
+      <body
+        className={`${poppins.variable} ${inter.variable} ${cormorant.variable} ${dmSans.variable} antialiased`}
+      >
         {children}
       </body>
     </html>

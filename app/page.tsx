@@ -8,6 +8,7 @@ import Loader from "@/components/Loader";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import VideoScrubSection from "@/components/VideoScrubSection";
+import HorizontalTextSection from "@/components/HorizontalTextSection";
 import PerformanceSection from "@/components/PerformanceSection";
 import FeaturesSection from "@/components/FeaturesSection";
 import CTASection from "@/components/CTASection";
@@ -28,26 +29,34 @@ export default function Home() {
 
     // Initialize smooth scrolling with Lenis
     const lenis = new Lenis({
-      lerp: 0.08, // Adjust for smoothness vs responsiveness
+      lerp: 0.1,
       smoothWheel: true,
     });
 
     lenis.on("scroll", ScrollTrigger.update);
 
-    gsap.ticker.add((time) => {
-      lenis.raf(time * 1000);
-    });
-
+    // Named reference so gsap.ticker.remove correctly removes this exact fn
+    const onLenisTick = (time: number) => lenis.raf(time * 1000);
+    gsap.ticker.add(onLenisTick);
     gsap.ticker.lagSmoothing(0, 0);
+
+    // Let ScrollTrigger recalculate positions after Lenis is bound
+    ScrollTrigger.refresh();
 
     const cursor = cursorRef.current;
     const follower = followerRef.current;
-    if (!cursor || !follower) return;
+    if (!cursor || !follower) {
+      return () => {
+        gsap.ticker.remove(onLenisTick);
+        lenis.destroy();
+      };
+    }
 
     let mouseX = 0;
     let mouseY = 0;
     let followerX = 0;
     let followerY = 0;
+    let rafId: number;
 
     const onMove = (e: MouseEvent) => {
       mouseX = e.clientX;
@@ -59,7 +68,7 @@ export default function Home() {
       followerX += (mouseX - followerX) * 0.1;
       followerY += (mouseY - followerY) * 0.1;
       gsap.set(follower, { x: followerX, y: followerY });
-      requestAnimationFrame(raf);
+      rafId = requestAnimationFrame(raf);
     };
 
     const onEnterLink = () => {
@@ -76,13 +85,12 @@ export default function Home() {
       el.addEventListener("mouseenter", onEnterLink);
       el.addEventListener("mouseleave", onLeaveLink);
     });
-    requestAnimationFrame(raf);
+    rafId = requestAnimationFrame(raf);
 
     return () => {
       window.removeEventListener("mousemove", onMove);
-      gsap.ticker.remove((time) => {
-        lenis.raf(time * 1000);
-      });
+      cancelAnimationFrame(rafId);
+      gsap.ticker.remove(onLenisTick);
       lenis.destroy();
     };
   }, [loaded]);
@@ -99,6 +107,7 @@ export default function Home() {
         <Navbar />
         <HeroSection />
         <VideoScrubSection />
+        <HorizontalTextSection />
         <PerformanceSection />
         <FeaturesSection />
         <CTASection />

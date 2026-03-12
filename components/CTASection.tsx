@@ -3,70 +3,99 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { motion } from "framer-motion";
 
 gsap.registerPlugin(ScrollTrigger);
 
 export default function CTASection() {
   const sectionRef = useRef<HTMLElement>(null);
   const bgVideoRef = useRef<HTMLVideoElement>(null);
-  const wordRefs = useRef<(HTMLSpanElement | null)[]>([]);
-  const lineTopRef = useRef<HTMLDivElement>(null);
-  const lineBottomRef = useRef<HTMLDivElement>(null);
+  const headingRef = useRef<HTMLDivElement>(null);
   const subRef = useRef<HTMLParagraphElement>(null);
   const btnRef = useRef<HTMLDivElement>(null);
+  const lineTopRef = useRef<HTMLDivElement>(null);
+  const lineBottomRef = useRef<HTMLDivElement>(null);
+  const wordRefs = useRef<(HTMLSpanElement | null)[]>([]);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
+      // Lines draw in
       gsap.fromTo(
         [lineTopRef.current, lineBottomRef.current],
         { scaleX: 0 },
         {
           scaleX: 1,
-          duration: 1.8,
+          duration: 1.6,
           ease: "power3.inOut",
           transformOrigin: "left center",
           stagger: 0.2,
-          scrollTrigger: { trigger: sectionRef.current, start: "top 75%" },
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 75%",
+          },
         }
       );
 
+      // Heading words fall in
       const words = wordRefs.current.filter(Boolean);
       gsap.fromTo(
         words,
-        { opacity: 0, y: 90, rotateX: 40 },
+        { opacity: 0, y: 80, rotateX: 40 },
         {
-          opacity: 1, y: 0, rotateX: 0,
-          duration: 1.2, stagger: 0.1, ease: "power4.out",
-          scrollTrigger: { trigger: words[0], start: "top 80%" },
+          opacity: 1,
+          y: 0,
+          rotateX: 0,
+          duration: 1,
+          stagger: 0.08,
+          ease: "power4.out",
+          scrollTrigger: {
+            trigger: headingRef.current,
+            start: "top 80%",
+          },
         }
       );
 
+      // Subtitle
       gsap.fromTo(
         subRef.current,
         { opacity: 0, y: 30 },
         {
-          opacity: 1, y: 0, duration: 1.1, ease: "power3.out",
-          scrollTrigger: { trigger: subRef.current, start: "top 86%" },
+          opacity: 1,
+          y: 0,
+          duration: 0.9,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: subRef.current,
+            start: "top 85%",
+          },
         }
       );
 
+      // Buttons
       gsap.fromTo(
         btnRef.current,
-        { opacity: 0, y: 28 },
+        { opacity: 0, y: 30 },
         {
-          opacity: 1, y: 0, duration: 1, ease: "power3.out",
-          scrollTrigger: { trigger: btnRef.current, start: "top 88%" },
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: btnRef.current,
+            start: "top 88%",
+          },
         }
       );
 
+      // Background video subtle parallax
       ScrollTrigger.create({
         trigger: sectionRef.current,
         start: "top bottom",
         end: "bottom top",
         scrub: true,
         onUpdate: (self) => {
-          if (bgVideoRef.current) gsap.set(bgVideoRef.current, { y: self.progress * 90 });
+          if (bgVideoRef.current) {
+            gsap.set(bgVideoRef.current, { y: self.progress * 80 });
+          }
         },
       });
     }, sectionRef);
@@ -89,108 +118,79 @@ export default function CTASection() {
         ref={sectionRef}
         id="configure"
         className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden"
-        style={{ background: "#060606" }}
+        style={{ background: "#080808" }}
       >
-        {/* Blurred bg video */}
+        {/* Background video (blurred, dark overlay) */}
         <video
           ref={bgVideoRef}
-          className="absolute inset-0 w-full h-full object-cover scale-110"
+          className="absolute inset-0 w-full h-full object-cover opacity-20 scale-110"
           src="/hero.mp4"
-          autoPlay muted loop playsInline
-          style={{ opacity: 0.12, filter: "blur(14px)" }}
+          autoPlay
+          muted
+          loop
+          playsInline
+          style={{ filter: "blur(8px)" }}
         />
-
-        {/* Vignette */}
         <div
           className="absolute inset-0"
           style={{
-            background: "radial-gradient(ellipse 90% 90% at 50% 55%, rgba(6,6,6,0.22) 0%, rgba(6,6,6,0.97) 100%)",
+            background: "radial-gradient(ellipse 80% 80% at 50% 50%, rgba(8,8,8,0.4) 0%, rgba(8,8,8,0.95) 100%)",
           }}
         />
 
-        {/* 3D perspective floor grid */}
-        <div
-          className="absolute bottom-0 left-0 right-0 h-1/2 pointer-events-none"
-          style={{
-            backgroundImage: `
-              linear-gradient(rgba(184,150,46,0.04) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(184,150,46,0.04) 1px, transparent 1px)
-            `,
-            backgroundSize: "55px 55px",
-            maskImage: "linear-gradient(0deg, transparent 0%, rgba(0,0,0,0.7) 70%, transparent 100%)",
-            WebkitMaskImage: "linear-gradient(0deg, transparent 0%, rgba(0,0,0,0.7) 70%, transparent 100%)",
-            transform: "perspective(700px) rotateX(58deg)",
-            transformOrigin: "bottom center",
-          }}
-        />
-
-        {/* Orbiting rings */}
-        <motion.div
-          className="absolute pointer-events-none rounded-full"
-          style={{ width: 640, height: 640, border: "1px solid rgba(184,150,46,0.055)", left: "50%", top: "50%", x: "-50%", y: "-50%" }}
-          animate={{ rotate: 360 }}
-          transition={{ duration: 36, repeat: Infinity, ease: "linear" }}
-        />
-        <motion.div
-          className="absolute pointer-events-none rounded-full"
-          style={{ width: 860, height: 860, border: "1px solid rgba(184,150,46,0.03)", left: "50%", top: "50%", x: "-50%", y: "-50%" }}
-          animate={{ rotate: -360 }}
-          transition={{ duration: 56, repeat: Infinity, ease: "linear" }}
-        />
-
-        <div
-          className="relative z-10 flex flex-col items-center text-center"
-          style={{
-            maxWidth: "1100px",
-            width: "100%",
-            paddingLeft: "clamp(28px, 6vw, 80px)",
-            paddingRight: "clamp(28px, 6vw, 80px)",
-          }}
-        >
+        <div className="relative z-10 flex flex-col items-center text-center px-8 md:px-16 max-w-5xl mx-auto">
           {/* Label */}
-          <motion.div
-            className="flex items-center gap-5 mb-14"
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <span className="inline-block w-8 h-px bg-[#b8962e]/55" />
-            <span className="eyebrow">04 — Build Your Dream</span>
-            <span className="inline-block w-8 h-px bg-[#b8962e]/55" />
-          </motion.div>
+          <div className="flex items-center gap-4 mb-10">
+            <span className="inline-block w-8 h-px bg-[#b8962e]/60" />
+            <span
+              style={{
+                fontSize: "10px",
+                letterSpacing: "0.42em",
+                color: "#b8962e",
+                textTransform: "uppercase",
+                fontWeight: 400,
+              }}
+            >
+              04 — Build Your Dream
+            </span>
+            <span className="inline-block w-8 h-px bg-[#b8962e]/60" />
+          </div>
 
           {/* Gold line top */}
           <div
             ref={lineTopRef}
-            className="w-full mb-12 h-px"
+            className="w-full mb-10 h-px"
             style={{ background: "linear-gradient(90deg, transparent, #b8962e, transparent)", transformOrigin: "left center" }}
           />
 
           {/* Big headline */}
-          <div className="overflow-visible mb-8" style={{ perspective: "900px" }}>
+          <div
+            ref={headingRef}
+            className="overflow-visible mb-8"
+            style={{ perspective: "800px" }}
+          >
             <h2
               style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "clamp(40px, 6vw, 80px)",
-                fontWeight: 300,
-                letterSpacing: "-0.02em",
-                lineHeight: 0.95,
-                color: "#f0ede8",
-                fontStyle: "italic",
+                fontSize: "clamp(48px, 10vw, 160px)",
+                fontWeight: 200,
+                letterSpacing: "-0.03em",
+                lineHeight: 0.9,
+                color: "#f5f5f5",
               }}
             >
               {headline.map((word, i) => (
                 <span
                   key={word}
                   ref={(el) => { wordRefs.current[i] = el; }}
-                  className="opacity-0 inline-block mr-[0.18em]"
+                  className="opacity-0 inline-block mr-[0.2em]"
                   style={
                     i === 2
                       ? {
-                          color: "#b8962e",
+                          background: "linear-gradient(135deg, #b8962e 0%, #f5d78e 50%, #b8962e 100%)",
+                          WebkitBackgroundClip: "text",
+                          WebkitTextFillColor: "transparent",
+                          backgroundClip: "text",
                           fontWeight: 700,
-                          fontStyle: "normal",
                         }
                       : {}
                   }
@@ -204,22 +204,20 @@ export default function CTASection() {
           {/* Gold line bottom */}
           <div
             ref={lineBottomRef}
-            className="w-full mb-12 h-px"
+            className="w-full mb-10 h-px"
             style={{ background: "linear-gradient(90deg, transparent, #b8962e, transparent)", transformOrigin: "left center" }}
           />
 
           {/* Subtitle */}
           <p
             ref={subRef}
-            className="opacity-0 mb-14"
+            className="opacity-0 max-w-xl mb-12"
             style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "16px",
+              fontSize: "15px",
               fontWeight: 300,
-              lineHeight: 1.95,
-              color: "rgba(240,237,232,0.42)",
+              lineHeight: 1.9,
+              color: "rgba(245,245,245,0.45)",
               letterSpacing: "0.02em",
-              maxWidth: "540px",
             }}
           >
             Every Mercedes begins as a vision. Select your model, personalise
@@ -227,271 +225,124 @@ export default function CTASection() {
             toward perfection today.
           </p>
 
-          {/* CTA Buttons — fixed hover disappear */}
-          <div ref={btnRef} className="opacity-0 flex flex-col sm:flex-row gap-6 items-center">
-            {/* Primary */}
-            <motion.a
+          {/* CTA Buttons */}
+          <div
+            ref={btnRef}
+            className="opacity-0 flex flex-col sm:flex-row gap-5 items-center"
+          >
+            <a
               href="#"
-              className="group relative flex items-center justify-center gap-4"
+              className="group relative flex items-center gap-4 px-12 py-5 overflow-hidden text-center"
               style={{
-                background: "linear-gradient(110deg, #b8962e, #d4a843)",
-                fontFamily: "var(--font-body)",
-                fontSize: "15px",
-                letterSpacing: "0.1em",
-                fontWeight: 600,
+                background: "#b8962e",
+                color: "#080808",
+                fontSize: "11px",
+                letterSpacing: "0.28em",
+                fontWeight: 700,
                 textTransform: "uppercase",
-                minWidth: "240px",
-                overflow: "hidden",
-                padding: "20px 48px",
-                borderRadius: "4px",
+                minWidth: "220px",
+                justifyContent: "center",
               }}
-              whileHover={{ scale: 1.03, boxShadow: "0 16px 55px rgba(184,150,46,0.38)" }}
-              whileTap={{ scale: 0.97 }}
-              transition={{ duration: 0.22 }}
             >
-              {/* Fill overlay — z:0, below text */}
+              <span className="relative z-10">Start Configuring</span>
               <span
-                className="absolute inset-0 translate-x-[-101%] group-hover:translate-x-0 transition-transform duration-500 ease-out"
-                style={{ background: "linear-gradient(110deg, #d4a843, #e8c86a)", zIndex: 0 }}
+                className="absolute inset-0 bg-[#f5d78e] translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500"
               />
-              {/* Text always on top */}
-              <span className="relative z-10 whitespace-nowrap" style={{ color: "#070707" }}>
-                Start Configuring
-              </span>
-              <motion.span
-                className="relative z-10"
-                style={{ color: "#070707" }}
-                animate={{ x: [0, 5, 0] }}
-                transition={{ duration: 1.7, repeat: Infinity, ease: "easeInOut" }}
-              >
-                →
-              </motion.span>
-            </motion.a>
-
-            {/* Secondary */}
-            <motion.a
+            </a>
+            <a
               href="#"
-              className="flex items-center justify-center gap-3"
+              className="flex items-center gap-4 px-12 py-5 hover:bg-white/5 transition-colors duration-300 text-center"
               style={{
-                border: "1px solid rgba(240,237,232,0.25)",
-                color: "rgba(240,237,232,0.85)",
-                fontFamily: "var(--font-body)",
-                fontSize: "15px",
-                letterSpacing: "0.1em",
-                fontWeight: 500,
+                border: "1px solid rgba(255,255,255,0.15)",
+                color: "rgba(245,245,245,0.7)",
+                fontSize: "11px",
+                letterSpacing: "0.28em",
+                fontWeight: 400,
                 textTransform: "uppercase",
-                minWidth: "240px",
-                backdropFilter: "blur(12px)",
-                padding: "20px 48px",
-                borderRadius: "4px",
+                minWidth: "220px",
+                justifyContent: "center",
               }}
-              whileHover={{
-                scale: 1.03,
-                borderColor: "rgba(184,150,46,0.45)",
-                color: "#f0ede8",
-              }}
-              whileTap={{ scale: 0.97 }}
-              transition={{ duration: 0.22 }}
             >
               Book Test Drive
-            </motion.a>
+            </a>
           </div>
-
-          {/* Stats trio */}
-          <motion.div
-            className="flex items-center gap-16 mt-24 pt-10"
-            style={{ borderTop: "1px solid rgba(240,237,232,0.055)" }}
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.5, duration: 1.2 }}
-          >
-            {[
-              { v: "100+", l: "Years of Innovation" },
-              { v: "3M+", l: "Cars Worldwide" },
-              { v: "50+", l: "Countries Served" },
-            ].map((item) => (
-              <div key={item.l} className="flex flex-col items-center gap-2">
-                <span
-                  style={{
-                    fontFamily: "var(--font-display)",
-                    fontSize: "clamp(22px, 3.5vw, 40px)",
-                    fontWeight: 300,
-                    color: "#f0ede8",
-                    letterSpacing: "-0.02em",
-                    fontStyle: "italic",
-                  }}
-                >
-                  {item.v}
-                </span>
-                <span
-                  style={{
-                    fontFamily: "var(--font-body)",
-                    fontSize: "9px",
-                    letterSpacing: "0.32em",
-                    color: "rgba(240,237,232,0.28)",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  {item.l}
-                </span>
-              </div>
-            ))}
-          </motion.div>
         </div>
 
-        {/* Floating badge */}
-        <motion.div
-          className="absolute bottom-16 right-10 md:right-20 flex flex-col items-end gap-1.5"
-          animate={{ y: [0, -9, 0], opacity: [0.28, 0.55, 0.28] }}
-          transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
+        {/* Floating spec badge */}
+        <div
+          className="absolute bottom-16 right-8 md:right-16 flex flex-col items-end gap-1 opacity-30"
         >
-          <span
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "8px",
-              letterSpacing: "0.45em",
-              textTransform: "uppercase",
-              color: "#b8962e",
-            }}
-          >
+          <span style={{ fontSize: "9px", letterSpacing: "0.4em", textTransform: "uppercase", color: "#b8962e" }}>
             The Best
           </span>
-          <span
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "8px",
-              letterSpacing: "0.45em",
-              textTransform: "uppercase",
-              color: "rgba(240,237,232,0.4)",
-            }}
-          >
+          <span style={{ fontSize: "9px", letterSpacing: "0.4em", textTransform: "uppercase", color: "white" }}>
             Or Nothing
           </span>
-        </motion.div>
+        </div>
       </section>
 
       {/* ── Footer ── */}
       <footer
-        className="relative"
-        style={{ background: "#030303", borderTop: "1px solid rgba(240,237,232,0.05)", paddingTop: "80px", paddingBottom: "60px" }}
+        style={{
+          background: "#050505",
+          borderTop: "1px solid rgba(255,255,255,0.06)",
+        }}
+        className="px-8 md:px-16 lg:px-24 py-20"
       >
-        <div
-          style={{
-            paddingLeft: "clamp(28px, 6vw, 96px)",
-            paddingRight: "clamp(28px, 6vw, 96px)",
-            paddingTop: "80px",
-            paddingBottom: "60px",
-          }}
-        >
-          <div className="flex flex-col md:flex-row gap-16 mb-16">
-            {/* Brand */}
-            <div className="flex-shrink-0" style={{ maxWidth: "280px" }}>
-              <div className="flex items-center gap-4 mb-7">
-                <motion.svg
-                  width="36" height="36" viewBox="0 0 36 36" fill="none"
-                  animate={{ rotate: [0, 360] }}
-                  transition={{ duration: 24, repeat: Infinity, ease: "linear" }}
-                >
-                  <circle cx="18" cy="18" r="17" stroke="#b8962e" strokeWidth="0.8" />
-                  <path d="M18 2 L18 18 L30.5 26.5 M18 18 L5.5 26.5" stroke="#b8962e" strokeWidth="1.4" strokeLinecap="round" fill="none" />
-                </motion.svg>
-                <span
-                  style={{
-                    fontFamily: "var(--font-body)",
-                    fontSize: "12px",
-                    letterSpacing: "0.24em",
-                    textTransform: "uppercase",
-                    fontWeight: 300,
-                    color: "#f0ede8",
-                  }}
-                >
-                  Mercedes-Benz
-                </span>
-              </div>
-              <p
-                style={{
-                  fontFamily: "var(--font-body)",
-                  fontSize: "13px",
-                  fontWeight: 300,
-                  lineHeight: 1.95,
-                  color: "rgba(240,237,232,0.28)",
-                }}
-              >
-                Since 1926. The pioneers of the automobile. Engineering
-                excellence through every generation.
-              </p>
+        <div className="flex flex-col md:flex-row gap-16 mb-16">
+          {/* Brand */}
+          <div className="flex-shrink-0 max-w-xs">
+            <div className="flex items-center gap-3 mb-6">
+              <svg width="40" height="40" viewBox="0 0 36 36" fill="none">
+                <circle cx="18" cy="18" r="17" stroke="#b8962e" strokeWidth="1" />
+                <path d="M18 2 L18 18 L30.5 26.5 M18 18 L5.5 26.5" stroke="#b8962e" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+              </svg>
+              <span style={{ fontSize: "12px", letterSpacing: "0.22em", textTransform: "uppercase", fontWeight: 300, color: "#f5f5f5" }}>
+                Mercedes-Benz
+              </span>
             </div>
-
-            {/* Links */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-12 flex-1">
-              {footerLinks.map((col) => (
-                <div key={col[0]} className="flex flex-col gap-5">
-                  <span
-                    style={{
-                      fontFamily: "var(--font-body)",
-                      fontSize: "9px",
-                      letterSpacing: "0.38em",
-                      textTransform: "uppercase",
-                      color: "#b8962e",
-                      fontWeight: 500,
-                    }}
-                  >
-                    {col[0]}
-                  </span>
-                  {col.slice(1).map((link) => (
-                    <motion.a
-                      key={link}
-                      href="#"
-                      style={{
-                        fontFamily: "var(--font-body)",
-                        fontSize: "13px",
-                        fontWeight: 300,
-                        color: "rgba(240,237,232,0.30)",
-                        letterSpacing: "0.03em",
-                      }}
-                      whileHover={{ color: "#f0ede8", x: 5 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      {link}
-                    </motion.a>
-                  ))}
-                </div>
-              ))}
-            </div>
+            <p style={{ fontSize: "12px", fontWeight: 300, lineHeight: 1.9, color: "rgba(245,245,245,0.3)" }}>
+              Since 1926. The pioneers of the automobile. Engineering excellence
+              through every generation.
+            </p>
           </div>
 
-          {/* Bottom bar */}
-          <div
-            className="flex flex-col md:flex-row gap-4 items-center justify-between pt-8"
-            style={{ borderTop: "1px solid rgba(240,237,232,0.05)" }}
-          >
-            <p
-              style={{
-                fontFamily: "var(--font-body)",
-                fontSize: "11px",
-                fontWeight: 300,
-                color: "rgba(240,237,232,0.18)",
-                letterSpacing: "0.04em",
-              }}
-            >
-              © 2026 Mercedes-Benz AG. All rights reserved.
-            </p>
-            <div className="flex items-center gap-3">
-              <span className="inline-block w-4 h-px bg-[#b8962e]/35" />
-              <span
-                style={{
-                  fontFamily: "var(--font-body)",
-                  fontSize: "8px",
-                  letterSpacing: "0.42em",
-                  textTransform: "uppercase",
-                  color: "rgba(184,150,46,0.35)",
-                }}
-              >
-                The Best Or Nothing
-              </span>
-              <span className="inline-block w-4 h-px bg-[#b8962e]/35" />
-            </div>
+          {/* Links grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-10 flex-1">
+            {footerLinks.map((col) => (
+              <div key={col[0]} className="flex flex-col gap-4">
+                <span style={{ fontSize: "10px", letterSpacing: "0.35em", textTransform: "uppercase", color: "#b8962e", fontWeight: 500 }}>
+                  {col[0]}
+                </span>
+                {col.slice(1).map((link) => (
+                  <a
+                    key={link}
+                    href="#"
+                    style={{ fontSize: "12px", fontWeight: 300, color: "rgba(245,245,245,0.35)", letterSpacing: "0.04em" }}
+                    className="hover:text-white/70 transition-colors duration-200"
+                  >
+                    {link}
+                  </a>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer bottom */}
+        <div
+          className="flex flex-col md:flex-row gap-4 items-center justify-between pt-8"
+          style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+        >
+          <p style={{ fontSize: "11px", fontWeight: 300, color: "rgba(245,245,245,0.2)", letterSpacing: "0.04em" }}>
+            © 2026 Mercedes-Benz AG. All rights reserved.
+          </p>
+          <div className="flex items-center gap-2">
+            <span className="inline-block w-4 h-px bg-[#b8962e]/40" />
+            <span style={{ fontSize: "9px", letterSpacing: "0.4em", textTransform: "uppercase", color: "rgba(184,150,46,0.4)" }}>
+              The Best Or Nothing
+            </span>
+            <span className="inline-block w-4 h-px bg-[#b8962e]/40" />
           </div>
         </div>
       </footer>

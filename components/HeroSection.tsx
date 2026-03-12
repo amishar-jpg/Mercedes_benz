@@ -89,14 +89,8 @@ export default function HeroSection() {
         end: "bottom top",
         scrub: 1.2,
         onUpdate: (self) => {
-          gsap.to(videoRef.current, {
-            y: self.progress * 100,
-            duration: 0,
-          });
-          gsap.to(overlayRef.current, {
-            opacity: 0.4 + self.progress * 0.6,
-            duration: 0,
-          });
+          gsap.set(videoRef.current, { y: self.progress * 100 });
+          gsap.set(overlayRef.current, { opacity: 0.4 + self.progress * 0.6 });
         },
       });
 

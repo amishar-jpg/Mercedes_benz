@@ -17,8 +17,8 @@ export default function Loader({ onComplete }: { onComplete: () => void }) {
     // Logo 3D entrance
     tl.fromTo(
       logoRef.current,
-      { opacity: 0, scale: 0.7, rotateY: -45 },
-      { opacity: 1, scale: 1, rotateY: 0, duration: 0.8, ease: "power3.out" }
+      { opacity: 0, scale: 0.65, rotateY: -60, y: 12 },
+      { opacity: 1, scale: 1, rotateY: 0, y: 0, duration: 1.4, ease: "expo.out" }
     );
 
     // Ring stroke animation
@@ -30,10 +30,10 @@ export default function Loader({ onComplete }: { onComplete: () => void }) {
         ringRef.current,
         {
           strokeDashoffset: 0,
-          duration: 1.6,
+          duration: 2.6,
           ease: "power2.inOut",
         },
-        0.3
+        0.4
       );
     }
 
@@ -41,7 +41,7 @@ export default function Loader({ onComplete }: { onComplete: () => void }) {
     const proxy = { p: 0 };
     tl.to(proxy, {
       p: 100,
-      duration: 1.6,
+      duration: 2.6,
       ease: "power2.inOut",
       onUpdate: () => {
         if (barRef.current) {
@@ -51,17 +51,17 @@ export default function Loader({ onComplete }: { onComplete: () => void }) {
           percentRef.current.textContent = `${Math.round(proxy.p)}%`;
         }
       },
-    }, 0.3);
+    }, 0.4);
 
-    // Exit: scale + fade out (split slide)
+    // Exit: smooth curtain wipe upward
     tl.to(
       overlayRef.current,
       {
         clipPath: "inset(0% 0% 100% 0%)",
-        duration: 0.9,
-        ease: "power3.inOut",
+        duration: 1.3,
+        ease: "expo.inOut",
       },
-      2.1
+      3.3
     );
   }, [onComplete]);
 
@@ -97,8 +97,8 @@ export default function Loader({ onComplete }: { onComplete: () => void }) {
           left: "50%", top: "50%",
           x: "-50%", y: "-50%",
         }}
-        animate={{ scale: [1, 1.3, 1] }}
-        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+        animate={{ scale: [1, 1.35, 1] }}
+        transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
       />
 
       {/* Mercedes star with animated ring */}
@@ -147,7 +147,7 @@ export default function Loader({ onComplete }: { onComplete: () => void }) {
               background: "radial-gradient(circle, rgba(184,150,46,0.2) 0%, transparent 70%)",
             }}
             animate={{ scale: [1, 1.6, 1], opacity: [0.6, 0, 0.6] }}
-            transition={{ duration: 2, repeat: Infinity }}
+            transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
           />
         </div>
 
@@ -197,7 +197,7 @@ export default function Loader({ onComplete }: { onComplete: () => void }) {
             className="absolute top-0 bottom-0 w-8"
             style={{ background: "linear-gradient(90deg, transparent, rgba(245,215,142,0.4), transparent)" }}
             animate={{ left: ["-10%", "110%"] }}
-            transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut", delay: 0.4 }}
+            transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut", delay: 0.6 }}
           />
         </div>
         <span

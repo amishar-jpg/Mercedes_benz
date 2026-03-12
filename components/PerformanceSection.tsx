@@ -79,10 +79,9 @@ function StatCard({ s, index }: { s: typeof STATS[0]; index: number }) {
 
   return (
     <motion.div
-      className="group py-12 px-8 flex flex-col gap-3 relative overflow-hidden"
+      className="group py-14 px-9 flex flex-col gap-3 relative overflow-hidden"
       style={{
-        borderRight: "1px solid rgba(240,237,232,0.06)",
-        borderBottom: "1px solid rgba(240,237,232,0.06)",
+        border: "1px solid rgba(240,237,232,0.1)",
         transformStyle: "preserve-3d",
         rotateX,
         rotateY,
@@ -233,8 +232,8 @@ export default function PerformanceSection() {
       <div
         className="relative z-10"
         style={{
-          paddingLeft: "clamp(28px, 6vw, 96px)",
-          paddingRight: "clamp(28px, 6vw, 96px)",
+          paddingLeft: "clamp(32px, 7vw, 112px)",
+          paddingRight: "clamp(32px, 7vw, 112px)",
         }}
       >
         {/* Heading */}
@@ -292,21 +291,21 @@ export default function PerformanceSection() {
 
         {/* Stats grid */}
         <div
-          className="grid grid-cols-2 md:grid-cols-4 gap-0 mb-28"
-          style={{ borderLeft: "1px solid rgba(240,237,232,0.06)", perspective: "900px" }}
+          className="grid grid-cols-2 md:grid-cols-4 gap-5 mb-32"
+          style={{ perspective: "900px" }}
         >
           {STATS.map((s, i) => <StatCard key={s.label} s={s} index={i} />)}
         </div>
 
         {/* Pillars */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-7 md:gap-10">
           {PILLARS.map((p, i) => (
             <motion.div
               key={p.title}
               className="group flex flex-col gap-6 relative overflow-hidden"
               style={{
-                border: "1px solid rgba(240,237,232,0.06)",
-                padding: "clamp(28px, 4vw, 44px)",
+                border: "1px solid rgba(240,237,232,0.1)",
+                padding: "clamp(32px, 4.5vw, 52px)",
               }}
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
